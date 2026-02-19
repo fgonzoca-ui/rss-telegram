@@ -1,0 +1,20 @@
+name: RSS to Telegram
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check RSS
+        run: |
+          FEED="TU_RSS"
+          LAST=$(curl -s "$FEED" | grep -m1 "<link>" | sed 's/.*<link>//;s/<\/link>.*//')
+
+          if [ "$LAST" != "$(cat last.txt 2>/dev/null)" ]; then
+            echo "$LAST" > last.txt
+            curl "https://api.telegram.org/botTOKEN/sendMessage?chat_id=CHATID&text=$LAST"
+          fi
